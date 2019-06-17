@@ -1,15 +1,138 @@
 createdAt: "2019-06-16T21:48:09.273Z"
-updatedAt: "2019-06-16T21:48:50.221Z"
+updatedAt: "2019-06-17T01:19:29.971Z"
 type: "MARKDOWN_NOTE"
 folder: "d376be14dfc7e93f0039"
-title: "Scanning"
+title: "3: Scanning"
 tags: [
   "ptp"
 ]
 content: '''
-  # Scanning
+  # 3: Scanning
   
+  ## 3-Way Handshake
+  Header fields involved in the handshake:
+  * Sequence number
+  * Acknowledement numbers
+  * SYN and ACK flags
+  ![Screenshot from 2019-06-16 19-21-41.png](:storage/79a4f997-0fb9-45be-8b0e-66a4aabb7bb5/ce444bf2.png)
+  ## Hping
+  Tool that allows for creation of TCP packets
+  ### Send simple TCP SYN packet
+  `hping3 -S [ip address] -p 80 -c 4`
+  * -S: SYN flag set
+  * -p: port to use
+  * -c: only send # count of packets
+  
+  ## Detect Live Hosts
+  ### NMAP
+  `nmap <scan type> <options> <target>`
+  #### TCP SYN Scan
+  Does not open a full TCP connection:
+  * (local) SYN
+  * (target) SYN/ACK
+  * (local) RST
+  `nmap -sS -p 135 [ip address]`
+  #### TCP Connect Scan
+  Default type of TCP scan. Establishes full tcp connection
+  `nmap -sT -p 135 [ip address]`
+  #### UDP Scan
+  Slower and more difficult to conduct, but auditors may overlook UDP services
+  `nmap -sU -p 137 [ip address]`
+  #### Idle Scan
+  Stealth scan technique. Requires a 'zombie' machine in the network, which is a machine that is not sending or receiving any packets. By monitoring the fragmentation ID one can gain insight on whether a connection has been made.
+  * 3 machines are needed for this scan
+    * The scanner machine
+    * The zombie machine
+      * Must assign IP ID incrementally and globally
+      * No other traffic that will disturb the IP ID
+      * Can be found by: `nmap -O -v [ip address]` and the output will indicate "IP ID Sequence Generation: Incremental"
+    * The target machine
+  The attack works by: 
+  1. Querying the zombie's IP ID by sending a SYN/ACK
+  2. Since the communication is not expected, the zombie will send back a RST with its IP ID
+  3. Forge a SYN packet (IP spoofing) that spoofs the zombie's IP as the source and sending it to the target machine,
+  4. The target sends back a SYN/ACK to the zombie,
+  5. The zombie does not expect it therefore, it sends a RST back to the target and increments its IP ID,
+  6. The scanner machine probes the zombie's IP ID again,
+  7. The zombie sends back a RST which is examine. If the IP ID has been incremented by 2, the target machine's port was open, if only incremented by 1, then it is closed
+  ![Screenshot from 2019-06-16 20-05-34.png](:storage/79a4f997-0fb9-45be-8b0e-66a4aabb7bb5/018a6d1f.png)
+  ##### Example
+  `nmap -Pn -sI [zombie ip]:[open port] [target ip] -v`
+  * -Pn: prevents ping from the original (scanner) IP
+  * -v: verbose
+  * Finding zombie
+    * `nmap --script ipidseq [ip address] -p [port]`
+  #### Never do DNS resolution
+  Reduces scan time and reduces reverse DNS lookup traffic
+  `nmap -n [ip address]`
+  #### FTP Bounce Scan
+  Stealth scan that will appear to have originated from the FTP server
+  `nmap -b [ip address]` - Maybe?
+  #### TCP Null, FIN, Xmas Scans
+  Exploits a loophole in the TCP RFC that says if a destination port is closed, an incoming packet not containing a RST will cause a RST to be sent.  Also states that if a packet does not have either a SYN, RST, or ACK flag should be dropped and returned (RST if the port is closed, no response if it is open).
+  Most likely will be caught by firewall or IDS, so not stealthy
+  Also, Most OSs do not conform to the RFC
+  * Null Scan
+    * No flags set
+    * `nmap -sN [ip address]`
+  * FIN Scan
+    * Only FIN flag set
+    * `nmap -sF [ip address]`
+  * Xmas Scan
+    * Sets FIN, PSH, and URG flags
+    * `nmap -sX [ip address]`
+  #### TCP ACK scan
+  Used to map rulesets of a firewall to determine if the devices are both stateful and which ports are filterned. Not used to determine open ports.
+  When scanning unfiltered systems, both open and closed ports will return a RST packet (unfiltered)
+  Ports that doe not respond will be labeled as filtered (firewall in place)
+  #### IP Protocol Scan
+  Enumerates the types of IP Protocols that a target system supports
+  Walks through the eight-bit IP protocol field
+  `nmap -sO [ip address]`
+  Will recieve ICMP protocol unreachable messages (instead of ICMP port unreachable messages).
+  #### Outputs
+  * Normal output (`-oN`)
+    * Normal output will be stored in file
+  * XML output (`-oX`)
+  * Grepable output (`-oG`)
+  #### Nmap Scripting Engine (NSE)
+  Written in Lua
+  stored in: `/usr/share/nmap/scripts`
+  Use (call default scripts): `nmap -sC [ip address]` 
+  Use (call specific script): `nmap --script=scriptName [ip address]`
+  help: `nmap --script-help "smb*" and discovery`
+  update: `nmap --script-updatedb`
+  Info gathering:
+  * `nmap --script whois-domain [ip addres]`
+  
+  Recon
+  * Host fingerprinting
+    * `nmap --script smb-os-discovery -p 445 [ip address]`
+  
+  * SMB enum
+    * `nmap --script smb-enum-shares [ip address] -p 445`
+  
+  Every script related to authentication category
+  * `nmap --script auth [ip address]`
+  
+  default category
+  * `nmap --script default [ip address]`
+  ### Performing Idle Scan
+  #### Finding a zombie
+  `hping3 -S -r -p [port] [ip address]`
+  * -r: view relative ID field
+  * to find what [port] (any open port will do) : `hping3 -S --scan known [ip address]`
+  * `hping3 -a [zombie IP] -S -p [Target Port] [Target ip]`
+    * -a: set source ip
+    * -S: set SYN flag
+    * -p: destination port
+  * Monitoring the zombie ID by continuing to run
+    * `hping3 -S -r -p [port] [zombie ip]`
+    * If ID increment is ever +2, we can deduce the `[Target Port]` is open of `[Target IP]`
 '''
-linesHighlighted: []
+linesHighlighted: [
+  17
+  76
+]
 isStarred: false
 isTrashed: false
