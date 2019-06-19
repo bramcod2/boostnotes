@@ -1,10 +1,11 @@
 createdAt: "2019-06-16T21:48:09.273Z"
-updatedAt: "2019-06-17T01:19:29.971Z"
+updatedAt: "2019-06-19T22:51:23.893Z"
 type: "MARKDOWN_NOTE"
 folder: "d376be14dfc7e93f0039"
 title: "3: Scanning"
 tags: [
   "ptp"
+  "NetworkSecurity"
 ]
 content: '''
   # 3: Scanning
@@ -119,6 +120,7 @@ content: '''
   * `nmap --script default [ip address]`
   ### Performing Idle Scan
   #### Finding a zombie
+  `nmap --script ipidseq [ip address] -p [port]`
   `hping3 -S -r -p [port] [ip address]`
   * -r: view relative ID field
   * to find what [port] (any open port will do) : `hping3 -S --scan known [ip address]`
@@ -129,6 +131,63 @@ content: '''
   * Monitoring the zombie ID by continuing to run
     * `hping3 -S -r -p [port] [zombie ip]`
     * If ID increment is ever +2, we can deduce the `[Target Port]` is open of `[Target IP]`
+  
+  ## Service
+  ### Banner Grabbing
+  * `ncat 192.168.0.25 22`
+  * `nc 192.168.0.25 22`
+  * `telnet 192.168.0.25 22`
+  * `nmap -sV [options] [ip address]`
+  
+  ## OS Fingerprinting
+  ### Active OS Fingerprinting
+  Requires sending packets to the target and analyzing the responses
+  `nmap -O -n [ip address]`
+  `nmap -A [ip address]`
+  * -A: enables OS detection, version detection, script scanning and traceroute
+  
+  ### Passive OS Fingerprinting
+  Does not send packets
+  tool : P0f
+  P0f provides information like:
+  * Host Uptime
+  * Operating System / Software
+  * Distance from current host
+  * User-Agents
+  * more...
+  Running P0f
+  `./p0f -i eth0`
+  
+  ## Firewall/IDS Evasion
+  ### Fragmentation
+  Splitting a single packet into smaller ones.
+  Modern IDS's rebuild fragmented packets making this technique ineffective
+  `nmap -sS -f [target ip]`
+  * -f: fragment the packets
+  * Does not work with -sT or -sV
+  ### Decoys
+  Add noise to the IDS by sending scans from spoofed IP addresses
+  In ord er to work, attack requires:
+  1. All decoys are up and running
+  2. The real IP address should appear in random order to the IDS
+  3. ISP's traversed by spoofed traffic let the traffic go through
+  `nmap -sS -D [decoyIP],[DecoyIP],ME,[decoyIP] [target IP]`
+  * yes really the keywork "ME"
+  * Cannot be used with -sT and -sV
+  ### Timing
+  Slow down scan to blend with other traffic
+  `nmap -sS -T[0-5] [target]`
+  * -T0 : Paranoid : 5 min
+  * -T1 : Sneaky : 15 sec
+  * -T2 : Polite : 0.4 sec
+  * -T3 : Normal : default
+  * -T4 : Aggressive : 10 millisec
+  * -T5 : Insane : 5 millisec
+  ### Source port
+  Changing source port to bypass misconfigured firewall. Example: using port 53 (DNS replies) or 20 (active FTP)
+  * `--source-port [port]`
+  * `-g [port]`
+  `namp -sS --source-port 53 [target]`
 '''
 linesHighlighted: [
   17
