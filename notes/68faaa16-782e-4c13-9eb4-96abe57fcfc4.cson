@@ -1,0 +1,13 @@
+createdAt: "2019-06-29T00:49:47.235Z"
+updatedAt: "2019-06-29T00:51:19.598Z"
+type: "MARKDOWN_NOTE"
+folder: "18f0516133fde417811e"
+title: "Routing"
+tags: []
+content: '''
+  # Routing
+  `ip route add <ip address>/<CIDR> via <Gateway IP>`
+'''
+linesHighlighted: []
+isStarred: false
+isTrashed: false

