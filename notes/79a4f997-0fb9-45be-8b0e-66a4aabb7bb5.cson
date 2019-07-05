@@ -1,14 +1,14 @@
 createdAt: "2019-06-16T21:48:09.273Z"
-updatedAt: "2019-06-19T22:51:23.893Z"
+updatedAt: "2019-07-05T18:32:57.784Z"
 type: "MARKDOWN_NOTE"
 folder: "d376be14dfc7e93f0039"
-title: "3: Scanning"
+title: "2.2: Scanning"
 tags: [
   "ptp"
   "NetworkSecurity"
 ]
 content: '''
-  # 3: Scanning
+  # 2.2: Scanning
   
   ## 3-Way Handshake
   Header fields involved in the handshake:

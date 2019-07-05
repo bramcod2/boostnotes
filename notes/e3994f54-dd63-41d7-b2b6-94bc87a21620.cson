@@ -1,0 +1,105 @@
+createdAt: "2019-07-05T17:57:11.817Z"
+updatedAt: "2019-07-05T19:12:31.660Z"
+type: "MARKDOWN_NOTE"
+folder: "d376be14dfc7e93f0039"
+title: "2.3: Enumeration"
+tags: []
+content: '''
+  # 2.3: Enumeration
+  Further gather more detailed information on devices and resources, including account names, shares, and misconfigured services
+  
+  ## NetBIOS
+  Allow applications on different systems to communicate with each other over the LAN. Can share printers and files, RPC, share messages and more.
+  Ports
+  * UDP 137 for name services
+  * UDP 138 for datagram services
+  * TCP 139 for session services
+  
+  ### Name Service
+  Same purpose as DNS record (NetBIOS name to IP address)
+  16-byte address, where the first 15 can be specified by the user, and the 16th is used to indicate the resource type
+  To show NetBIOS names on machine: `nbtstat -n`
+  Windows Internet Name Service (WINS): Service that maps NetBIOS names to IP address
+  
+  ### Datagram Service
+  Allows sending and receiving of datagram messages to and from specific NetBIOS names and broadcasts to all NetBIOS names.
+  
+  ### Session Service
+  Connection oriented communication between 2 NetBIOS names
+  NetBIOS Session Service (NBSS) is most common known of the NetBIOS services.
+  Example: for file sharing, the session service is used to establish a connection, then the SMB protocol takes over
+  Steps of establishing connection
+  1. The NetBIOS name is resolved into an IP address
+  2. A TCP connection is established between the two devices using TCP port 139
+  3. The device starting the connection sends a NetBIOS Session Request. This includes the NetBIOS name of the application that wants to establish the connection and the NetBIOS name to which to connect.
+  4. If the remote device is listening on that name, there will be a positive response and the session will be established.
+  
+  ## Server Message Block (SMB)
+  TCP port 445
+  Allows:
+  * Manipulating files
+  * sharing
+  * messaging
+  * Interprocess Communication (IPC)
+  
+  ## Tools for enumerating NetBIOS
+  After finding a machine with ports 137/139/445 open we can use 
+  ### `nbtstat`
+  * General info
+    * `nbtstat -A <targe IP>`
+    * If a code with `<20>` is found in the above command, it means the host has file and printer shares enabled, so we may be able to access them.
+  
+  ### `nbtscan`
+  `nbtscan -v <targe IP>` is a similar scan on Linux
+  Scan multiple targets with `nbtscan -v 192.168.1.0/24`
+  
+  ### `net`
+  The `net` commmand
+  Microsoft command
+  Ability to update user accounts, display, view and modify services, connect computers to shared resources
+  `net view <ip address>` to view domains, computers, and resources
+  `net use K: \\\\<ip address>\\C` to explore the C resource on the targe machine
+  
+  ### `smbclient`
+  Linux command
+  `sudo smbclient -L <ip address>`
+  Hidden shares have a `$` at the end
+  `IPC$` can be used for null session attacks
+  
+  ### `mount`
+  To navigate target shares
+  `sudo mount.cifs //<ip address>/C /media/K_share/ user=,pass=`
+  
+  ## Null Sessions
+  Establish a connection to the victim to gather info on shares, users, groups, registry keys, and more
+  Rely on Common Internet File System (CIFS) and Server Message Block (SMB)
+  To test: `net use \\\\<ip address>\\IPC$ "" /u:""`
+  
+  ### Winfingerprint
+  Gui tool
+  Windows only
+  
+  ### Winfo
+  Windows only
+  `winfo <target> -n`
+  
+  ### DumpSec
+  Windows only
+  Gui tool
+  
+  ### Enum4Linux
+  Linux Only
+  `enum4linux <target IP>`
+  
+  ### Rpcclient
+  Linux only
+  Must establish connection first: `rpcclient -N -U "" <target IP>`
+  Get users: `enumdomusers`
+  
+  ## NetBIOS and Null Session Video
+  
+  
+'''
+linesHighlighted: []
+isStarred: false
+isTrashed: false

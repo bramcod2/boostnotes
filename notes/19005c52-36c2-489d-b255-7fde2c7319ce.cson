@@ -1,14 +1,14 @@
 createdAt: "2019-06-16T21:47:35.115Z"
-updatedAt: "2019-06-17T01:30:08.198Z"
+updatedAt: "2019-07-05T18:33:06.856Z"
 type: "MARKDOWN_NOTE"
 folder: "d376be14dfc7e93f0039"
-title: "2: Information Gathering"
+title: "2.1: Information Gathering"
 tags: [
   "ptp"
   "NetworkSecurity"
 ]
 content: '''
-  # 2: Information Gathering
+  # 2.1: Information Gathering
   
 '''
 linesHighlighted: []
